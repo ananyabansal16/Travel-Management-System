@@ -18,17 +18,17 @@ CREATE TABLE Customer(
   cardNumber NUMBER,
   CONSTRAINT Customer_PK PRIMARY KEY (customerID));
 
-CREATE TABLE Employee(
-  employeeID NUMBER,
+CREATE TABLE user(
+  userID NUMBER,
   name VARCHAR2(40),
-  employeeAddress VARCHAR2(50),
+  userAddress VARCHAR2(50),
   phone NUMBER(9),
   password VARCHAR2(20),
   userName VARCHAR2(10),
   paycheck NUMBER (8, 2),
   branchName VARCHAR2(40),
   cardNumber NUMBER,
-  CONSTRAINT Employee_PK PRIMARY KEY (employeeID));
+  CONSTRAINT user_PK PRIMARY KEY (userID));
 
 CREATE TABLE Branch(
   name VARCHAR2(40),
@@ -72,7 +72,7 @@ CREATE TABLE Video(
 --SELECT--
 SELECT * FROM Card;
 SELECT * FROM Customer;
-SELECT * FROM Employee;
+SELECT * FROM user;
 SELECT * FROM Branch;
 SELECT * FROM Location;
 SELECT * FROM Book;
@@ -83,7 +83,7 @@ SELECT * FROM Rent;
 --DROP TABLES--
 DROP TABLE Card;
 DROP TABLE Customer;
-DROP TABLE Employee;
+DROP TABLE user;
 DROP TABLE Branch;
 DROP TABLE Location;
 DROP TABLE Book;
@@ -97,13 +97,13 @@ ADD CONSTRAINT Customer_FK
 FOREIGN KEY (cardNumber)
 REFERENCES Card(cardID);
 
-ALTER TABLE Employee
-ADD CONSTRAINT Employee_FK_Card
+ALTER TABLE user
+ADD CONSTRAINT user_FK_Card
 FOREIGN KEY (cardNumber)
 REFERENCES Card(cardID);
 
-ALTER TABLE Employee
-ADD CONSTRAINT Employee_FK_Branch
+ALTER TABLE user
+ADD CONSTRAINT user_FK_Branch
 FOREIGN KEY (branchName)
 REFERENCES Branch(name);
 
@@ -171,11 +171,11 @@ INSERT INTO Customer VALUES (8, 'MONICA', 'FAKE STREET 123', 639639639, 'monica1
 INSERT INTO Customer VALUES (9, 'PHOEBE', 'CENTRAL PERK', 678678678, 'phoebe123', 'pho9', '25-03-2016', 109);
 INSERT INTO Customer VALUES (10, 'RACHEL', 'WHEREVER', 687687687, 'rachel123', 'ra10', '01-09-2017', 110);
 
-INSERT INTO Employee VALUES (211, 'ROSS', 'HIS HOUSE', 671671671, 'ross123', 'ro11', 1200, 'ARCHEOLOGY', 551);
-INSERT INTO Employee VALUES (212, 'CHANDLER', 'OUR HEARTHS', 688688688, 'chandler123', 'chand12', 1150.50, 'ARCHEOLOGY', 552);
-INSERT INTO Employee VALUES (213, 'JOEY', 'LITTLE ITAYLY', 628628628, 'joey123', 'jo13', 975.75, 'ARCHEOLOGY', 553);
-INSERT INTO Employee VALUES (214, 'VICTOR', 'SANTA FE', 654321987, 'victor123', 'vic14', 2200, 'COMPUTING', 554);
-INSERT INTO Employee VALUES (215, 'JAIRO', 'ARMILLA', 698754321, 'jairo123', 'ja15', 2200.50, 'CHEMISTRY', 555);
+INSERT INTO user VALUES (211, 'ROSS', 'HIS HOUSE', 671671671, 'ross123', 'ro11', 1200, 'ARCHEOLOGY', 551);
+INSERT INTO user VALUES (212, 'CHANDLER', 'OUR HEARTHS', 688688688, 'chandler123', 'chand12', 1150.50, 'ARCHEOLOGY', 552);
+INSERT INTO user VALUES (213, 'JOEY', 'LITTLE ITAYLY', 628628628, 'joey123', 'jo13', 975.75, 'ARCHEOLOGY', 553);
+INSERT INTO user VALUES (214, 'VICTOR', 'SANTA FE', 654321987, 'victor123', 'vic14', 2200, 'COMPUTING', 554);
+INSERT INTO user VALUES (215, 'JAIRO', 'ARMILLA', 698754321, 'jairo123', 'ja15', 2200.50, 'CHEMISTRY', 555);
 
 INSERT INTO Location VALUES ('ARCHEOLOGY ROAD');
 INSERT INTO Location VALUES ('CHEMISTRY ROAD');
@@ -245,14 +245,14 @@ BEGIN
 END;
 
 
---EMPLOYEE-
-CREATE OR REPLACE PROCEDURE loginEmployee_library(user IN VARCHAR2, pass IN VARCHAR2)
+--user-
+CREATE OR REPLACE PROCEDURE loginuser_library(user IN VARCHAR2, pass IN VARCHAR2)
 IS
-  passAux employee.password%TYPE;
+  passAux user.password%TYPE;
   incorrect_password EXCEPTION;
 BEGIN
   SELECT password INTO passAux
-  FROM employee
+  FROM user
   WHERE username LIKE user;
   
   IF passAux LIKE pass THEN
@@ -268,12 +268,12 @@ END;
 
 SET SERVEROUTPUT ON;
 DECLARE
-  user employee.username%TYPE;
-  pass employee.password%TYPE;
+  user user.username%TYPE;
+  pass user.password%TYPE;
 BEGIN
   user := &Username;
   pass := &Password;
-  login_employee_library(user,pass);
+  login_user_library(user,pass);
 END;
 
 
@@ -393,8 +393,8 @@ BEGIN
 END;
 
 
---EMPLOYEE--
-CREATE OR REPLACE PROCEDURE employeeAccount_library(emploID IN employee.employeeid%TYPE)
+--user--
+CREATE OR REPLACE PROCEDURE userAccount_library(emploID IN user.userid%TYPE)
 IS
   auxCard NUMBER;
   auxFines NUMBER;
@@ -402,8 +402,8 @@ IS
   rented number := 0;
 BEGIN
   SELECT cardnumber INTO auxCard
-  FROM employee
-  WHERE employeeid LIKE emploID;
+  FROM user
+  WHERE userid LIKE emploID;
   
   SELECT COUNT(*) INTO rented
   FROM rent
@@ -433,10 +433,10 @@ END;
 
 SET SERVEROUTPUT ON;
 DECLARE
-  emploID employee.employeeid%TYPE;
+  emploID user.userid%TYPE;
 BEGIN
-  emploID := &Employee_ID;
-  employeeAcount_library(emploID);
+  emploID := &user_ID;
+  userAcount_library(emploID);
 END;
 
 
@@ -585,19 +585,19 @@ BEGIN
   updateInfo_library(auxCustomer,pNumber,address,newPass);
 END;
 
---EMPLOYEE--
-CREATE OR REPLACE PROCEDURE updateInfoEmp_library(auxEmployee IN employee.employeeid%TYPE, pNumber NUMBER, address VARCHAR2, newPass VARCHAR2, newPayCheck NUMBER,
+--user--
+CREATE OR REPLACE PROCEDURE updateInfoEmp_library(auxuser IN user.userid%TYPE, pNumber NUMBER, address VARCHAR2, newPass VARCHAR2, newPayCheck NUMBER,
 newBranch VARCHAR2)
 IS
 BEGIN
-  UPDATE employee
-  SET phone = pNumber, customeraddress = address, password = newPass, paycheck = auxEmployee, branchname = newBranch
-  WHERE employeeid = auxEmployee;
+  UPDATE user
+  SET phone = pNumber, customeraddress = address, password = newPass, paycheck = auxuser, branchname = newBranch
+  WHERE userid = auxuser;
 END;
 
 SET SERVEROUTPUT ON;
 DECLARE
-  auxEmployee emplouee.employeeid%TYPE;
+  auxuser emplouee.userid%TYPE;
   pNumber NUMBER;
   address VARCHAR2;
   newPass VARCHAR2;
@@ -610,7 +610,7 @@ BEGIN
   newPass := &Write_your_new_password_or_the_old_one_if_you_do_not_want_to_change_it;
   newPayCheck := &Write_your_new_paycheck_or_the_old_one_if_you_do_not_want_to_change_it;
   newBranch := &Write_your_new_branch_or_the_old_one_if_you_do_not_want_to_change_it;
-  updateInfoEmployee_library(auxCustomer,pNumber,address,newPass,newPayCheck,newBranch);
+  updateInfouser_library(auxCustomer,pNumber,address,newPass,newPayCheck,newBranch);
 END;
 
 
@@ -660,10 +660,10 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('Card created');
 END;
 
---EMPLOYEE--
+--user--
 CREATE OR REPLACE TRIGGER addCardEmp_library
 AFTER INSERT
-ON employee
+ON user
 FOR EACH ROW
 DECLARE
 BEGIN
@@ -1009,7 +1009,7 @@ END;
 
 --OBJECT--
 CREATE OR REPLACE TYPE director_library AS OBJECT(
-employeeid NUMBER,
+userid NUMBER,
 name VARCHAR2(40),
 address VARCHAR2(50),
 phone INT(9),
@@ -1022,7 +1022,7 @@ DECLARE
    director director_library; 
 BEGIN 
    director := director_library('212', 'CHANDLER', 'OUR HEARTHS', 688688688,1150.5,500); 
-   dbms_output.put_line('DIRECTOR ID: '|| director.employeeid); 
+   dbms_output.put_line('DIRECTOR ID: '|| director.userid); 
    dbms_output.put_line('--------------------------------------------' ); 
    dbms_output.put_line('NAME: '|| director.name); 
    dbms_output.put_line('ADDRESS: '|| director.address); 
